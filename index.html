@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>repl.it</title>
+	<link href="style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+  <!-- select tag is just a drop down list -->
+  Select Voice: <select name="" id="voiceList"></select>
+  <br></br>
+  Speed:<select name="" id= "speakRate"></select>
+  <br></br>
+  <input type = "text" id="textInput"/>
+  <button id="buttonSpeak">Speak</button>
+  <button id="pauseButton" onclick= "pause()">Pause</button>
+
+  <script> 
+    //querySelector is like getelementbyid but more inclusive
+    var voiceList = document.getElementById("voiceList");
+    var textInput = document.getElementById('textInput');
+    var buttonSpeak = document.getElementById('buttonSpeak');
+    var pauseButton = document.getElementById('pauseButton');
+
+    
+    //speech interface reference
+    var tts = window.speechSynthesis;
+    var voices = [];
+    function GetVoices(){
+      //push all available voices to the array
+      voices = tts.getVoices();
+      //for each voice available:
+      voices.forEach((voice)=>{
+        //create an option in the drop down list
+        var listItem = document.createElement('option');
+        //set the name in the drop down
+        listItem.textContent = voice.name;
+        //set the voice from the data and language inputted
+        //english voice speak english chinese voice speak chinese(defaults to english if not set)
+        listItem.setAttribute('data-lang',voice.language);
+        listItem.setAttribute('data-name',voice.name);
+        voiceList.appendChild(listItem);
+      });
+      //default to first voice
+      voiceList.selectedIndex = 0;
+    }
+    GetVoices();
+    
+    var speakRate = document.getElementById("speakRate");
+    for(let i=0.25; i<2.25;i+=0.25){
+      let text = document.createElement("option");
+      text.textContent = i;
+      speakRate.appendChild(text);
+    }
+    buttonSpeak.addEventListener('click',()=>{
+      //store text input for speech 
+      var toSpeak = new SpeechSynthesisUtterance(textInput.value);
+      //find current selected voice and get the name of the voice
+      var selectedVoiceName = voiceList.selectedOptions[0].getAttribute('data-name');
+      pauseButton.style.visibility = "visible";
+      voices.forEach((voice)=>{
+        //triple equal returns true if type and values are equal, double equal converts type if not same and then checks if values are equal
+        // if the voice name and the selected voice name are the same then set the voice to that voice 
+        if(voice.name === selectedVoiceName){
+          toSpeak.voice = voice;
+          toSpeak.rate = speakRate.selectedOptions[0].textContent;
+        }
+      });
+      //speak text input
+      tts.speak(toSpeak);
+      toSpeak.onend = function() {
+        pauseButton.style.visibility = "hidden";
+      }
+
+    });
+  </script>
+
+	<script src="script.js">
+	</script>
+
+</body>
+
+</html>
